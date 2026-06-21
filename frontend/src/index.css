@@ -1,0 +1,352 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #030303;
+  --color-foreground: #ffffff;
+  --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ============================
+   CSS CUSTOM PROPERTIES
+   ============================ */
+:root {
+  --bg-primary: #06060c;
+  --bg-secondary: #0a0a14;
+  --bg-card: rgba(31, 31, 37, 0.45);
+  --bg-elevated: rgba(255, 255, 255, 0.04);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.12);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+  --accent-cyan: rgba(0, 240, 255, 0.15);
+  --accent-cyan-border: rgba(0, 240, 255, 0.25);
+}
+
+.light-theme {
+  --bg-primary: #f0f4f8;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.8);
+  --bg-elevated: rgba(0, 0, 0, 0.04);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-medium: rgba(0, 0, 0, 0.12);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent-cyan: rgba(6, 182, 212, 0.1);
+  --accent-cyan-border: rgba(6, 182, 212, 0.3);
+}
+
+body {
+  margin: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* ============================
+   HEADER & SIDEBAR (light)
+   ============================ */
+.light-theme .header-bar {
+  background: rgba(255, 255, 255, 0.88) !important;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06) !important;
+}
+.light-theme .header-bar > div:first-child { opacity: 0 !important; }
+.light-theme .header-icon { filter: none !important; }
+
+.light-theme .sidebar-panel {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+.light-theme .sidebar-active-item {
+  background: linear-gradient(to right, rgba(6, 182, 212, 0.1), rgba(139, 92, 210, 0.08)) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(6, 182, 212, 0.2) !important;
+}
+
+/* ============================
+   GLASSMORPHISM CARDS
+   ============================ */
+.glass-card {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(40px) !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06), 0 8px 32px 0 rgba(0, 0, 0, 0.4) !important;
+}
+.glass-card:hover {
+  border-color: var(--border-medium) !important;
+}
+.light-theme .glass-card {
+  background: rgba(255, 255, 255, 0.75) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+.light-theme .glass-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 12px 32px rgba(0, 0, 0, 0.08) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ============================
+   NEWS FEED CARDS
+   ============================ */
+.light-theme [class*="border-l-2"] {
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+.light-theme [class*="border-l-emerald"] { border-left-color: #22c55e !important; }
+.light-theme [class*="border-l-red"] { border-left-color: #ef4444 !important; }
+.light-theme [class*="border-l-amber"] { border-left-color: #f59e0b !important; }
+
+/* ============================
+   INPUT / SELECT / TEXTAREA
+   ============================ */
+.light-theme input,
+.light-theme select,
+.light-theme textarea {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: var(--text-primary) !important;
+}
+.light-theme input::placeholder { color: var(--text-muted) !important; }
+.light-theme input:focus,
+.light-theme select:focus {
+  border-color: rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1) !important;
+}
+
+/* ============================
+   BUTTONS
+   ============================ */
+.light-theme button {
+  color: var(--text-secondary) !important;
+}
+.light-theme button:hover {
+  color: var(--text-primary) !important;
+}
+.light-theme .hover\:bg-white\/\[0\.05\]:hover,
+.light-theme .hover\:bg-white\/\[0\.04\]:hover {
+  background: var(--bg-elevated) !important;
+}
+
+/* ============================
+   RECHARTS
+   ============================ */
+.light-theme .recharts-text { fill: #475569 !important; }
+.light-theme .recharts-cartesian-grid line { stroke: rgba(0, 0, 0, 0.08) !important; }
+.light-theme .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: var(--text-primary) !important;
+}
+.light-theme .recharts-tooltip-wrapper .recharts-default-tooltip li {
+  color: var(--text-primary) !important;
+}
+.light-theme .recharts-legend-item-text { color: var(--text-secondary) !important; }
+.light-theme .recharts-cartesian-axis-tick-value { fill: #475569 !important; }
+.light-theme .recharts-reference-line line { stroke: rgba(0, 0, 0, 0.1) !important; }
+
+/* Recharts SVG text override (targets inline fill styles) */
+.light-theme .recharts-wrapper text,
+.light-theme .recharts-wrapper tspan { fill: #475569 !important; }
+.light-theme .recharts-wrapper .recharts-tooltip-cursor { stroke: rgba(0, 0, 0, 0.1) !important; }
+
+/* ============================
+   FLOATING GLOW BLOBS
+   ============================ */
+.glow-blob { opacity: 0.3; }
+.light-theme .glow-blob { opacity: 0.08 !important; }
+.light-theme .glow-blob-cyan { background: radial-gradient(circle, rgba(6, 182, 212, 0.3) 0%, transparent 70%) !important; }
+.light-theme .glow-blob-purple { background: radial-gradient(circle, rgba(139, 92, 210, 0.25) 0%, transparent 70%) !important; }
+.light-theme .glow-blob-rose { background: radial-gradient(circle, rgba(244, 63, 94, 0.2) 0%, transparent 70%) !important; }
+
+/* ============================
+   PARTICLES (hidden in light)
+   ============================ */
+.light-theme .godmode-particles { opacity: 0 !important; }
+
+/* ============================
+   BACKGROUND GRADIENTS
+   ============================ */
+.light-theme .bg-gradient-to-br { opacity: 0.2 !important; }
+.light-theme [class*="blur-3xl"] { opacity: 0.2 !important; }
+
+/* ============================
+   NEON EFFECTS (dimmed in light)
+   ============================ */
+.light-theme .neon-glow-cyan,
+.light-theme .neon-glow-purple,
+.light-theme .neon-glow-rose {
+  box-shadow: none !important;
+}
+.light-theme .drop-shadow-\[0_0_15px_rgba\(0\,240\,255\,0\.6\)\] { filter: none !important; }
+.light-theme .shadow-\[0_0_8px_rgba\(52\,211\,153\,0\.8\)\] { box-shadow: none !important; }
+
+/* ============================
+   SCROLLBAR
+   ============================ */
+.scrollbar-premium::-webkit-scrollbar { width: 6px; }
+.scrollbar-premium::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.03); border-radius: 3px; }
+.scrollbar-premium::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(0, 240, 255, 0.4) 0%, rgba(139, 92, 246, 0.4) 100%);
+  border-radius: 3px;
+}
+.light-theme .scrollbar-premium::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.04); }
+.light-theme .scrollbar-premium::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.35) 0%, rgba(139, 92, 210, 0.35) 100%);
+}
+
+/* ============================
+   SENTIMENT BADGES
+   ============================ */
+.sentiment-bullish {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+}
+.light-theme .sentiment-bullish { color: #16a34a !important; background: rgba(34, 197, 94, 0.1) !important; border-color: rgba(34, 197, 94, 0.3) !important; }
+
+.sentiment-bearish {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+.light-theme .sentiment-bearish { color: #dc2626 !important; background: rgba(239, 68, 68, 0.1) !important; border-color: rgba(239, 68, 68, 0.3) !important; }
+
+.sentiment-neutral {
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.2) 0%, rgba(148, 163, 184, 0.1) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  color: #94a3b8;
+}
+.light-theme .sentiment-neutral { color: #64748b !important; background: rgba(148, 163, 184, 0.12) !important; border-color: rgba(148, 163, 184, 0.3) !important; }
+
+/* ============================
+   RISK BADGES
+   ============================ */
+.risk-high {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.05) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+.light-theme .risk-high { color: #dc2626 !important; background: rgba(239, 68, 68, 0.08) !important; }
+
+.risk-medium {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(234, 179, 8, 0.05) 100%);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  color: #facc15;
+}
+.light-theme .risk-medium { color: #ca8a04 !important; background: rgba(234, 179, 8, 0.08) !important; }
+
+.risk-low {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.05) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+}
+.light-theme .risk-low { color: #16a34a !important; background: rgba(34, 197, 94, 0.08) !important; }
+
+/* ============================
+   LIVE / EXPORT / FILTER BADGES
+   ============================ */
+.light-theme .bg-emerald-500\/10 { background: rgba(16, 185, 129, 0.08) !important; }
+.light-theme .border-emerald-500\/30 { border-color: rgba(16, 185, 129, 0.25) !important; }
+.light-theme .bg-cyan-500\/20 { background: rgba(6, 182, 212, 0.1) !important; }
+.light-theme .border-cyan-500\/30 { border-color: rgba(6, 182, 212, 0.25) !important; }
+.light-theme .bg-cyan-500\/10 { background: rgba(6, 182, 212, 0.08) !important; }
+
+/* ============================
+   LIGHT THEME TEXT COLOR OVERRIDES
+   ============================ */
+/* Primary text */
+.light-theme .text-white { color: var(--text-primary) !important; }
+.light-theme .text-slate-50 { color: var(--text-primary) !important; }
+.light-theme .text-slate-100 { color: var(--text-primary) !important; }
+.light-theme .text-slate-200 { color: var(--text-primary) !important; }
+.light-theme .text-slate-300 { color: var(--text-secondary) !important; }
+.light-theme .text-gray-200 { color: var(--text-primary) !important; }
+
+/* Secondary text */
+.light-theme .text-slate-400 { color: var(--text-secondary) !important; }
+.light-theme .text-gray-400 { color: var(--text-secondary) !important; }
+.light-theme .text-gray-500 { color: var(--text-muted) !important; }
+
+/* Muted text */
+.light-theme .text-slate-500 { color: var(--text-muted) !important; }
+.light-theme .text-slate-600 { color: var(--text-muted) !important; }
+
+/* Cyan accent */
+.light-theme .text-cyan-300 { color: #0891b2 !important; }
+.light-theme .text-cyan-400 { color: #0891b2 !important; }
+.light-theme .text-cyan-500 { color: #0e7490 !important; }
+
+/* Green/emerald */
+.light-theme .text-emerald-300 { color: #059669 !important; }
+.light-theme .text-emerald-400 { color: #059669 !important; }
+.light-theme .text-emerald-500 { color: #047857 !important; }
+
+/* Red */
+.light-theme .text-red-300 { color: #dc2626 !important; }
+.light-theme .text-red-400 { color: #dc2626 !important; }
+.light-theme .text-red-500 { color: #b91c1c !important; }
+
+/* Amber */
+.light-theme .text-amber-300 { color: #d97706 !important; }
+.light-theme .text-amber-400 { color: #d97706 !important; }
+.light-theme .text-amber-500 { color: #b45309 !important; }
+.light-theme .text-yellow-400 { color: #ca8a04 !important; }
+
+/* Purple */
+.light-theme .text-purple-300 { color: #7c3aed !important; }
+.light-theme .text-purple-400 { color: #7c3aed !important; }
+.light-theme .text-purple-500 { color: #6d28d9 !important; }
+
+/* Blue */
+.light-theme .text-blue-300 { color: #2563eb !important; }
+.light-theme .text-blue-400 { color: #2563eb !important; }
+.light-theme .text-blue-500 { color: #1d4ed8 !important; }
+
+/* Hover states */
+.light-theme .hover\:text-white:hover { color: var(--text-primary) !important; }
+.light-theme .hover\:text-slate-300:hover { color: var(--text-secondary) !important; }
+.light-theme .hover\:text-blue-300:hover { color: #1d4ed8 !important; }
+.light-theme .hover\:text-blue-400:hover { color: #2563eb !important; }
+.light-theme .hover\:text-red-400:hover { color: #dc2626 !important; }
+.light-theme .hover\:text-amber-300:hover { color: #b45309 !important; }
+
+/* Placeholder text */
+.light-theme .placeholder\:text-slate-500::placeholder { color: var(--text-muted) !important; }
+.light-theme .placeholder\:text-slate-400::placeholder { color: var(--text-secondary) !important; }
+
+/* ============================
+   INLINE STYLE OVERRIDES
+   ============================ */
+.light-theme [style*="background: rgba(10, 10, 20"] {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ============================
+   ANIMATION UTILITIES
+   ============================ */
+@keyframes dash { to { stroke-dashoffset: -200; } }
+.node-line { stroke-dasharray: 12 6; animation: dash 8s linear infinite; }
+
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.animate-float { animation: float 6s ease-in-out infinite; }
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(0, 240, 255, 0.6), 0 0 60px rgba(0, 240, 255, 0.2); }
+}
+.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.2); opacity: 0.5; }
+}

@@ -1,0 +1,389 @@
+{
+  "projectName": "PLOTCODE",
+  "tagline": "AI-Assisted End-to-End Delivery Automation",
+  "docType": "Master Build Plan",
+  "confidential": true,
+  "outputPath": "output",
+
+  "overview": {
+    "description": "Plotcode is a 14-stage agentic pipeline that automates the software development lifecycle: from feature request submission (via Slack or Telegram) through AI repo analysis, code generation, CI validation, PR creation, QA, and production deployment — with mandatory human approval at 5 defined checkpoints.",
+    "goal": "The goal is that a product manager with a clearly stated requirement can trigger a deployment without writing a single line of code. The AI handles analysis, implementation, testing, and documentation. Humans stay in control at every decision gate."
+  },
+
+  "flowSummary": [
+    { "stage": "1", "task": "Feature request submitted via Slack workflow or Telegram bot", "owner": "Requester", "type": "UI", "notes": "Structured form: title, business need, priority, affected service" },
+    { "stage": "2", "task": "Request ingested — unique ID assigned, ticket created in Supabase", "owner": "intake_agent.py", "type": "Agent" },
+    { "stage": "3", "task": "HITL Gate 1 — initial request reviewed and approved", "owner": "Product / Tech Owner", "type": "HITL", "notes": "Slack interactive message with Approve / Reject / Request changes buttons" },
+    { "stage": "4", "task": "AI repo analysis — clone, diff, impact map, risk assessment, implementation plan", "owner": "analysis_agent.py", "type": "Agent" },
+    { "stage": "5", "task": "HITL Gate 2 — implementation plan reviewed and approved", "owner": "Developer / Architect", "type": "HITL" },
+    { "stage": "6", "task": "Feature branch created, code written, tests added or updated", "owner": "coder_agent.py", "type": "Agent", "notes": "Self-heal loop: up to 3 retries on CI failure before escalating to human" },
+    { "stage": "7", "task": "CI runs: lint, unit tests, integration tests, security scan, build", "owner": "validation_agent.py + GitHub Actions", "type": "Test" },
+    { "stage": "8", "task": "Pull request created with summary, test evidence, risks, rollback plan", "owner": "pr_agent.py", "type": "Agent" },
+    { "stage": "9", "task": "HITL Gate 3 — PR reviewed and merge approved", "owner": "Reviewer", "type": "HITL", "notes": "RBAC-enforced: only assigned reviewers may approve" },
+    { "stage": "10", "task": "Change deployed to QA / staging environment", "owner": "deployment_agent.py", "type": "Agent" },
+    { "stage": "11", "task": "HITL Gate 4 — feature validated against original requirement", "owner": "Requester / QA Owner", "type": "HITL" },
+    { "stage": "12", "task": "HITL Gate 5 — production deployment explicitly approved", "owner": "Production Owner", "type": "HITL" },
+    { "stage": "13", "task": "Change deployed to production with monitoring active", "owner": "deployment_agent.py + monitoring_agent.py", "type": "Agent", "notes": "Auto-rollback on metric breach" },
+    { "stage": "14", "task": "Closure — ticket updated, changelog written, Slack notification sent", "owner": "Orchestrator", "type": "Infra" }
+  ],
+
+  "guardrails": [
+    { "text": "The AI never merges a PR without human approval", "owner": "System", "type": "Guardrail" },
+    { "text": "The AI never deploys to production without explicit human approval", "owner": "System", "type": "Guardrail" },
+    { "text": "The AI never reads, logs, or transmits secrets or credentials", "owner": "System", "type": "Guardrail" },
+    { "text": "The AI never modifies RBAC configuration or CI/CD pipeline definitions", "owner": "System", "type": "Guardrail" },
+    { "text": "The AI never skips a defined HITL gate", "owner": "System", "type": "Guardrail" },
+    { "text": "The self-healing loop halts after max retries and escalates to a human", "owner": "System", "type": "Guardrail" },
+    { "text": "Every AI action is logged with a prompt hash, response summary, and timestamp", "owner": "System", "type": "Guardrail" }
+  ],
+
+  "phases": [
+    {
+      "num": 0,
+      "title": "Foundation & Infrastructure",
+      "tag": "BLOCKER",
+      "tagColor": "8B1A1A",
+      "tagBg": "FDF0F0",
+      "intro": "Everything else depends on this phase being solid. Do not proceed to Phase 1 until every item here is checked off.",
+      "sections": [
+        {
+          "title": "Monorepo Structure",
+          "tasks": [
+            { "text": "Create monorepo root with /orchestrator /agents /shared /supabase /infra /dashboard", "owner": "Both", "type": "Infra" },
+            { "text": "Initialise Git repo, add .gitignore", "owner": "Both", "type": "Infra" },
+            { "text": "Create .env.example with all required keys (no real values ever committed)", "owner": "Both", "type": "Infra", "notes": "Keys: SUPABASE_URL, SUPABASE_SERVICE_KEY, OPENAI_API_KEY, SLACK_BOT_TOKEN, GITHUB_TOKEN" },
+            { "text": "Create docker-compose.yml — Supabase local, orchestrator, agents worker", "owner": "Both", "type": "Infra" },
+            { "text": "Verify docker-compose up -d boots without errors", "owner": "Both", "type": "Infra" }
+          ]
+        },
+        {
+          "title": "Supabase Setup",
+          "tasks": [
+            { "text": "Write schema.sql — requests table with all fields", "owner": "Both", "type": "Infra", "notes": "id, status enum, stage int, title, description, priority, affected_service, requester_id, repo_url, branch_name, pr_url, plan jsonb, ai_logs jsonb[], hitl_approvals jsonb[], error_log text[], created_at, updated_at" },
+            { "text": "Write rbac_roles table — user_id, role, primary key (user_id, role)", "owner": "Both", "type": "Infra", "notes": "Roles: product_owner, developer, reviewer, qa_owner, prod_owner" },
+            { "text": "Write hitl_gates table — gate name, allowed roles array, request_id FK", "owner": "Both", "type": "Infra" },
+            { "text": "Enable Row Level Security on requests and rbac_roles tables", "owner": "Both", "type": "Infra" },
+            { "text": "Enable Supabase Realtime on requests table", "owner": "Both", "type": "Infra" },
+            { "text": "Create seed.sql — insert test user roles for demo", "owner": "Both", "type": "Infra" },
+            { "text": "Run schema.sql and seed.sql against local Supabase, verify with Supabase Studio", "owner": "Both", "type": "Infra" }
+          ]
+        },
+        {
+          "title": "GitHub Setup",
+          "tasks": [
+            { "text": "Create a demo target repo (plotcode-demo-app) — simple REST API with tests", "owner": "Both", "type": "Infra", "notes": "Must have: package.json/pyproject, test suite, GitHub Actions CI workflow" },
+            { "text": "Generate GitHub Personal Access Token with repo + workflow scopes", "owner": "Both", "type": "Infra" },
+            { "text": "Verify PAT can create branches, open PRs, and trigger workflow runs via API", "owner": "Both", "type": "Infra" },
+            { "text": "Add branch protection rule on main — require PR + passing CI before merge", "owner": "Both", "type": "Infra" }
+          ]
+        },
+        {
+          "title": "Slack / Telegram Setup",
+          "tasks": [
+            { "text": "Create Slack app in api.slack.com — enable Socket Mode for local dev", "owner": "Both", "type": "Infra" },
+            { "text": "Add Bot Token Scopes: chat:write, commands, workflow.steps:execute, reactions:write", "owner": "Both", "type": "Infra" },
+            { "text": "Enable Interactive Components — set Request URL to /slack/interactions endpoint", "owner": "Both", "type": "Infra" },
+            { "text": "Build Slack Workflow — form fields: Request Title, Business Need, Priority, Affected Service", "owner": "Both", "type": "Infra", "notes": "Workflow posts structured payload to /slack/intake webhook" },
+            { "text": "(Alternative) Create Telegram bot via BotFather, store token in .env", "owner": "Both", "type": "Infra" },
+            { "text": "Test Slack message receipt end-to-end: send form → verify orchestrator receives payload", "owner": "Both", "type": "Infra" }
+          ]
+        }
+      ]
+    },
+    {
+      "num": 1,
+      "title": "Orchestrator — State Machine",
+      "tag": "CORE",
+      "tagColor": "1E3A5F",
+      "tagBg": "EBF0F7",
+      "intro": "The orchestrator never does AI work. Its only job is to advance requests through stages and call the right agent at the right time. Build it as a pure state machine.",
+      "sections": [
+        {
+          "title": "Node.js / Fastify Orchestrator",
+          "tasks": [
+            { "text": "Initialise Fastify project: npm init, install fastify @supabase/supabase-js @slack/bolt dotenv", "owner": "Both", "type": "Infra" },
+            { "text": "TypeScript config: tsconfig.json, ts-node-dev for hot reload", "owner": "Both", "type": "Infra" },
+            { "text": "Define Request type in types/request.ts matching Supabase schema exactly", "owner": "Both", "type": "Infra" },
+            { "text": "Implement /health GET endpoint — returns {ok: true, ts: Date.now()}", "owner": "Both", "type": "Infra" },
+            { "text": "Implement /slack/intake POST webhook — receives Slack form payload, calls intake agent", "owner": "Both", "type": "Infra" },
+            { "text": "Implement /slack/interactions POST webhook — receives button clicks, validates RBAC, advances stage", "owner": "Both", "type": "Infra" },
+            { "text": "Implement advance(requestId) state machine function with status → handler map", "owner": "Both", "type": "Infra" },
+            { "text": "Implement waitForHITL(requestId, gate) — posts Slack approval message, sets status to awaiting_gate_N", "owner": "Both", "type": "Infra" },
+            { "text": "Implement RBAC middleware: canApprove(userId, gate) checks rbac_roles table", "owner": "Both", "type": "Infra" },
+            { "text": "Implement callAgent(agentName, request) — HTTP call to Python agent worker", "owner": "Both", "type": "Infra" },
+            { "text": "Implement agent result handler — on success update status, on failure log error and escalate", "owner": "Both", "type": "Infra" },
+            { "text": "Supabase Realtime subscription — listen to request updates, trigger advance() on status change", "owner": "Both", "type": "Infra" }
+          ]
+        },
+        {
+          "title": "Agent Communication Protocol",
+          "tasks": [
+            { "text": "Define AgentRequest schema: {request_id, payload, context} — shared between Node and Python", "owner": "Both", "type": "Infra" },
+            { "text": "Define AgentResult schema: {success, data, error, retry_suggested}", "owner": "Both", "type": "Infra" },
+            { "text": "Python agents expose POST /run endpoint — Fastify calls it, waits for result", "owner": "Both", "type": "Infra" },
+            { "text": "Implement agent registry in orchestrator — maps agent names to endpoint URLs", "owner": "Both", "type": "Infra" }
+          ]
+        }
+      ]
+    },
+    {
+      "num": 2,
+      "title": "Python Agents",
+      "tag": "CORE",
+      "tagColor": "3B1A6E",
+      "tagBg": "F2EEF9",
+      "intro": "Each agent is a standalone class with one public method: run(request). Agents never call each other. They only read/write to Supabase and return a result to the orchestrator.",
+      "sections": [
+        {
+          "title": "Agent Infrastructure (shared/)",
+          "tasks": [
+            { "text": "Install: fastapi uvicorn supabase openai PyGithub python-dotenv pydantic langchain", "owner": "Both", "type": "Infra" },
+            { "text": "shared/models.py — Pydantic models for AgentRequest and AgentResult", "owner": "Both", "type": "Agent" },
+            { "text": "shared/state.py — SupabaseStateStore class: get_request(), update_request(), append_log()", "owner": "Both", "type": "Agent" },
+            { "text": "shared/llm_client.py — LLMClient wrapping OpenAI / Claude with retry and rate limit handling", "owner": "Both", "type": "Agent" },
+            { "text": "shared/git_client.py — GitClient wrapping PyGitHub: create_branch(), commit_file(), create_pr()", "owner": "Both", "type": "Agent" },
+            { "text": "shared/guardrails.py — validate_diff(): checks for forbidden paths and secret patterns", "owner": "Both", "type": "Guardrail" },
+            { "text": "shared/audit.py — log_action(request_id, agent, prompt, response): writes to ai_logs column", "owner": "Both", "type": "Agent" },
+            { "text": "main.py — FastAPI app that registers all agent routers on /agents/{name}/run", "owner": "Both", "type": "Infra" }
+          ]
+        },
+        {
+          "title": "Intake Agent (intake_agent.py)",
+          "tasks": [
+            { "text": "Parse incoming Slack payload: extract title, description, priority, affected_service, requester_id", "owner": "Both", "type": "Agent" },
+            { "text": "Validate required fields — return error if missing", "owner": "Both", "type": "Agent" },
+            { "text": "Write new row to Supabase requests table with status=pending, stage=1", "owner": "Both", "type": "Agent" },
+            { "text": "Return AgentResult with request_id", "owner": "Both", "type": "Agent" },
+            { "text": "Test: send mock Slack payload, verify row appears in Supabase", "owner": "Both", "type": "Test" }
+          ]
+        },
+        {
+          "title": "Analysis Agent (analysis_agent.py)",
+          "tasks": [
+            { "text": "Clone target repo to temp directory using subprocess / GitPython", "owner": "Both", "type": "Agent" },
+            { "text": "Run git log --oneline -20 and git diff HEAD~5 to get recent context", "owner": "Both", "type": "Agent" },
+            { "text": "Build analysis prompt: repo context + request description + ask for: impacted files, proposed plan, risks, estimated complexity", "owner": "Both", "type": "Agent" },
+            { "text": "Call LLMClient.complete() — log prompt hash via audit.py", "owner": "Both", "type": "Agent" },
+            { "text": "Parse LLM response into structured plan: {files_to_change, approach, risks, test_strategy}", "owner": "Both", "type": "Agent" },
+            { "text": "Write plan to requests.plan column in Supabase", "owner": "Both", "type": "Agent" },
+            { "text": "Post plan summary to Slack thread as formatted message", "owner": "Both", "type": "Agent" },
+            { "text": "Test: run against demo repo with a sample request, verify plan quality", "owner": "Both", "type": "Test" }
+          ]
+        },
+        {
+          "title": "Coder Agent (coder_agent.py) — the self-heal loop",
+          "tasks": [
+            { "text": "Read implementation plan from requests.plan", "owner": "Both", "type": "Agent" },
+            { "text": "Create feature branch via git_client: plotcode/{request_id}-{slug}", "owner": "Both", "type": "Agent" },
+            { "text": "Build code generation prompt: existing file content + plan + instructions for diff only", "owner": "Both", "type": "Agent" },
+            { "text": "Call LLMClient.complete() to generate code changes", "owner": "Both", "type": "Agent" },
+            { "text": "Run guardrails.validate_diff() on generated code — block and escalate on violation", "owner": "Both", "type": "Guardrail" },
+            { "text": "Apply code changes to branch via git_client.commit_file()", "owner": "Both", "type": "Agent" },
+            { "text": "Trigger GitHub Actions CI via API call, poll for result", "owner": "Both", "type": "Agent" },
+            { "text": "Self-heal loop: if CI fails, read error output, re-prompt LLM with error context, retry (max 3)", "owner": "Both", "type": "Agent", "notes": "After 3 failures: update status=failed, post to Slack with error details, halt" },
+            { "text": "On CI pass: update branch_name in Supabase, advance to PR creation", "owner": "Both", "type": "Agent" },
+            { "text": "Test: deliberately introduce a failing test, verify heal loop fires and fixes it", "owner": "Both", "type": "Test" }
+          ]
+        },
+        {
+          "title": "PR Agent (pr_agent.py)",
+          "tasks": [
+            { "text": "Read branch_name, plan, request details from Supabase", "owner": "Both", "type": "Agent" },
+            { "text": "Build PR description from template: Summary, Changes Made, Test Evidence, Risks, Rollback Plan", "owner": "Both", "type": "Agent" },
+            { "text": "Create PR via git_client.create_pr() — base: main, head: feature branch", "owner": "Both", "type": "Agent" },
+            { "text": "Write pr_url to Supabase requests table", "owner": "Both", "type": "Agent" },
+            { "text": "Post PR link to Slack thread", "owner": "Both", "type": "Agent" },
+            { "text": "Test: verify PR appears in GitHub with correct description", "owner": "Both", "type": "Test" }
+          ]
+        },
+        {
+          "title": "Deployment Agent (deployment_agent.py)",
+          "tasks": [
+            { "text": "Trigger GitHub Actions deploy-staging workflow via API after PR merge", "owner": "Both", "type": "Agent" },
+            { "text": "Poll deployment status — update Supabase on success/failure", "owner": "Both", "type": "Agent" },
+            { "text": "Trigger GitHub Actions deploy-prod workflow after Gate 5 approval", "owner": "Both", "type": "Agent" },
+            { "text": "Poll prod deployment status — notify Slack on success", "owner": "Both", "type": "Agent" }
+          ]
+        },
+        {
+          "title": "Monitoring Agent (monitoring_agent.py)",
+          "tasks": [
+            { "text": "Poll GitHub deployment status every 30 seconds post-deploy", "owner": "Both", "type": "Agent" },
+            { "text": "Define metric thresholds: error rate >1%, p99 latency >2s, deployment health check failing", "owner": "Both", "type": "Agent" },
+            { "text": "On threshold breach: post alert to Slack, trigger rollback workflow, update Supabase status", "owner": "Both", "type": "Agent" },
+            { "text": "Post deployment success summary to Slack after 5 minutes of healthy metrics", "owner": "Both", "type": "Agent" }
+          ]
+        }
+      ]
+    },
+    {
+      "num": 3,
+      "title": "HITL Gates & RBAC",
+      "tag": "CRITICAL",
+      "tagColor": "B05000",
+      "tagBg": "FDF3EB",
+      "intro": "Human-in-the-loop gates are the core trust mechanism of Plotcode. They must be reliable, impossible to bypass, and clearly audited.",
+      "sections": [
+        {
+          "title": "RBAC Implementation",
+          "tasks": [
+            { "text": "Define GATE_ROLES map in orchestrator: gate1→[product_owner,technical_owner], gate2→[developer,architect], gate3→[reviewer], gate4→[requester,qa_owner], gate5→[prod_owner]", "owner": "Both", "type": "Infra" },
+            { "text": "canApprove(userId, gate) function: query rbac_roles, check intersection with GATE_ROLES[gate]", "owner": "Both", "type": "Infra" },
+            { "text": "All /slack/interactions handler calls canApprove before processing any approval", "owner": "Both", "type": "Infra" },
+            { "text": "On RBAC failure: reply to Slack with permission denied — log attempt", "owner": "Both", "type": "Infra" },
+            { "text": "Seed demo roles in Supabase for demo purposes", "owner": "Both", "type": "Infra" }
+          ]
+        },
+        {
+          "title": "Slack HITL Message Templates",
+          "tasks": [
+            { "text": "Gate 1 message: request summary card + Approve / Reject / Request Changes buttons", "owner": "Both", "type": "HITL" },
+            { "text": "Gate 2 message: AI implementation plan rendered as Slack blocks + Approve / Reject buttons", "owner": "Both", "type": "HITL" },
+            { "text": "Gate 3 message: PR link + diff summary + Approve Merge / Request Changes buttons", "owner": "Both", "type": "HITL" },
+            { "text": "Gate 4 message: staging URL + original requirement + Approve / Report Issue buttons", "owner": "Both", "type": "HITL" },
+            { "text": "Gate 5 message: changelog preview + deployment manifest + Approve Production Deploy / Hold buttons", "owner": "Both", "type": "HITL" },
+            { "text": "All gate messages include: request ID, stage number, who approved previous gates", "owner": "Both", "type": "HITL" },
+            { "text": "On rejection at any gate: prompt requester for changes, allow re-submission from that stage", "owner": "Both", "type": "HITL" }
+          ]
+        },
+        {
+          "title": "Audit Trail",
+          "tasks": [
+            { "text": "Every HITL approval writes to hitl_approvals jsonb[]: {gate, approver_id, role, decision, ts, note}", "owner": "Both", "type": "Infra" },
+            { "text": "Every AI action writes to ai_logs jsonb[]: {agent, prompt_hash, response_summary, ts}", "owner": "Both", "type": "Infra" },
+            { "text": "Every guardrail violation writes to error_log text[] with reason and blocked diff hash", "owner": "Both", "type": "Guardrail" },
+            { "text": "Closure message includes full audit summary: all gates, approvers, timestamps, PR link", "owner": "Both", "type": "Infra" }
+          ]
+        }
+      ]
+    },
+    {
+      "num": 4,
+      "title": "Guardrails & Safety",
+      "tag": "CRITICAL",
+      "tagColor": "8B1A1A",
+      "tagBg": "FDF0F0",
+      "intro": "Guardrails are not README items. They are code that runs on every AI output before it touches the repo. Make them visible — a guardrail trigger in the demo is a feature, not a bug.",
+      "sections": [
+        {
+          "title": "Guardrail Implementation",
+          "tasks": [
+            { "text": "guardrails.py validate_diff(): block writes to /.github/workflows/, /infra/, /supabase/", "owner": "Both", "type": "Guardrail" },
+            { "text": "guardrails.py: block code matching secret patterns — API keys, passwords, env vars in code", "owner": "Both", "type": "Guardrail", "notes": "Patterns: process.env.*, os.environ.get, hardcoded credential regex" },
+            { "text": "guardrails.py: block modifications to RBAC tables or pipeline config files", "owner": "Both", "type": "Guardrail" },
+            { "text": "guardrails.py: enforce max file change limit per PR — alert if >10 files changed", "owner": "Both", "type": "Guardrail" },
+            { "text": "Self-heal loop hard stop: after MAX_RETRIES=3, set status=failed, post escalation to Slack, halt all AI action", "owner": "Both", "type": "Guardrail" },
+            { "text": "No secrets in logs: scrub known key patterns from all log strings before writing to Supabase", "owner": "Both", "type": "Guardrail" },
+            { "text": "Implement a demo guardrail trigger — create a test request that attempts to modify a forbidden file", "owner": "Both", "type": "Test", "notes": "Use this in the live demo" }
+          ]
+        }
+      ]
+    },
+    {
+      "num": 5,
+      "title": "Dashboard & Demo Layer",
+      "tag": "DEMO",
+      "tagColor": "1E3A5F",
+      "tagBg": "EBF0F7",
+      "intro": "The dashboard is the demo. Judges watch a request flow through stages in real time. Every state change must be visible within 2 seconds of it happening.",
+      "sections": [
+        {
+          "title": "Next.js Dashboard",
+          "tasks": [
+            { "text": "npx create-next-app@latest dashboard — TypeScript, Tailwind, App Router", "owner": "Both", "type": "UI" },
+            { "text": "Install @supabase/supabase-js for realtime subscription", "owner": "Both", "type": "UI" },
+            { "text": "Request list page — table of all requests with current status, updated live via Supabase Realtime", "owner": "Both", "type": "UI" },
+            { "text": "Request detail page — 14-stage pipeline visualisation, current stage highlighted", "owner": "Both", "type": "UI" },
+            { "text": "AI plan panel — renders the analysis_agent JSON plan as formatted markdown", "owner": "Both", "type": "UI" },
+            { "text": "Audit trail panel — shows every HITL approval and AI action in chronological order", "owner": "Both", "type": "UI" },
+            { "text": "GitHub PR link card — status, CI badge, diff size, link to GitHub", "owner": "Both", "type": "UI" },
+            { "text": "Guardrail event feed — real-time list of any guardrail triggers with reason and resolution", "owner": "Both", "type": "UI" },
+            { "text": "Status badges: colour-coded per stage type (Agent=purple, HITL=orange, Deploy=green, Failed=red)", "owner": "Both", "type": "UI" },
+            { "text": "Mobile responsive — judges may view on phones", "owner": "Both", "type": "UI" }
+          ]
+        },
+        {
+          "title": "Demo Preparation",
+          "tasks": [
+            { "text": "Create demo-ready Slack workspace with 3 bots/users representing different RBAC roles", "owner": "Both", "type": "Infra" },
+            { "text": "Seed demo target repo with a simple GET /health + GET /users API", "owner": "Both", "type": "Infra" },
+            { "text": "Write the demo script: exact Slack message to type, exact sequence of button clicks", "owner": "Both", "type": "Infra", "notes": "Target: 4-5 minutes end-to-end" },
+            { "text": "Rehearse full demo flow minimum 5 times — time each run", "owner": "Both", "type": "Test" },
+            { "text": "Prepare a guardrail trigger demo request that shows the system blocking a dangerous operation", "owner": "Both", "type": "Test" },
+            { "text": "Prepare a self-heal demo: deliberately break a test, show AI fixing it", "owner": "Both", "type": "Test" },
+            { "text": "Record a backup video of the full demo in case of live network issues", "owner": "Both", "type": "Infra" }
+          ]
+        }
+      ]
+    },
+    {
+      "num": 6,
+      "title": "Testing & Hardening",
+      "tag": "QUALITY",
+      "tagColor": "1A6B3A",
+      "tagBg": "E8F5ED",
+      "intro": "",
+      "sections": [
+        {
+          "title": "End-to-End Flow Tests",
+          "tasks": [
+            { "text": "Happy path test: submit request → approve all 5 gates → verify deployment completes", "owner": "Both", "type": "Test" },
+            { "text": "Rejection test: reject at Gate 2, verify no code is written, verify requester is notified", "owner": "Both", "type": "Test" },
+            { "text": "Self-heal test: inject CI failure, verify 3 retry attempts, verify escalation on 3rd failure", "owner": "Both", "type": "Test" },
+            { "text": "Guardrail test: request that tries to modify .github/workflows — verify block and audit log", "owner": "Both", "type": "Test" },
+            { "text": "RBAC test: attempt Gate 1 approval with a user who only has qa_owner role — verify rejection", "owner": "Both", "type": "Test" },
+            { "text": "Concurrent requests test: submit 2 requests simultaneously — verify they do not interfere", "owner": "Both", "type": "Test" },
+            { "text": "Network timeout test: kill agent mid-run — verify orchestrator detects failure, sets status=failed", "owner": "Both", "type": "Test" }
+          ]
+        },
+        {
+          "title": "Prompt Quality",
+          "tasks": [
+            { "text": "Analysis prompt: test against 5 different request types, verify plan quality is consistently useful", "owner": "Both", "type": "Test" },
+            { "text": "Coder prompt: verify generated code passes ESLint and existing test suite on first attempt >70%", "owner": "Both", "type": "Test" },
+            { "text": "PR description prompt: verify output is structured, readable, and contains all required sections", "owner": "Both", "type": "Test" },
+            { "text": "Document all prompts in /agents/prompts/ as .md files — this is a deliverable", "owner": "Both", "type": "Infra" }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "deliverables": [
+    { "text": "README.md: project overview, architecture diagram, quick start, environment variables", "owner": "Both", "type": "Infra" },
+    { "text": "SLACK_WORKFLOW.md: how the Slack workflow is configured, screenshots, setup instructions", "owner": "Both", "type": "Infra" },
+    { "text": "PROMPTS.md: every AI prompt used, with rationale for each design decision", "owner": "Both", "type": "Infra" },
+    { "text": "RBAC.md: role definitions, who can do what at each gate, how to assign roles", "owner": "Both", "type": "Infra" },
+    { "text": "GUARDRAILS.md: list of all guardrails, what they check, what happens on trigger", "owner": "Both", "type": "Infra" },
+    { "text": "ARCHITECTURE.md: system diagram, component responsibilities, data flow, state machine definition", "owner": "Both", "type": "Infra" },
+    { "text": "DEMO_SCRIPT.md: exact steps to reproduce the demo, with expected outputs at each stage", "owner": "Both", "type": "Infra" }
+  ],
+
+  "techStack": [
+    { "layer": "Orchestrator", "choice": "Node.js 20 + Fastify", "reason": "Fast webhooks, excellent TypeScript, easy Supabase client" },
+    { "layer": "Agents runtime", "choice": "Python 3.11 + FastAPI", "reason": "Best AI/ML library support, clean async, Pydantic validation" },
+    { "layer": "AI provider", "choice": "OpenAI GPT-4o via OpenRouter", "reason": "Best code quality; fallback to Claude Sonnet if rate-limited" },
+    { "layer": "State DB", "choice": "Supabase (Postgres)", "reason": "Realtime out of the box, free tier, RLS for RBAC, Studio UI" },
+    { "layer": "CI/CD", "choice": "GitHub Actions", "reason": "Best-in-class, judges understand it, free for public repos" },
+    { "layer": "Messaging", "choice": "Slack Bolt for Python", "reason": "Official SDK, interactive messages, Socket Mode for local dev" },
+    { "layer": "GitHub API", "choice": "PyGitHub", "reason": "Full PR/branch/workflow API in Python" },
+    { "layer": "Dashboard", "choice": "Next.js 14 + Tailwind", "reason": "Fast to build, SSR, Supabase Realtime works natively" },
+    { "layer": "Local infra", "choice": "Docker Compose", "reason": "One command to start everything for demo" },
+    { "layer": "Hosting", "choice": "Railway (orchestrator) + Vercel (dashboard)", "reason": "One-click deploy, free tier sufficient for demo" }
+  ],
+
+  "winMoments": [
+    {
+      "title": "Moment 1 — The self-heal loop fires",
+      "body": "Introduce a deliberate test failure in the demo repo before the presentation. When the coder agent generates the fix and CI fails, show the console live. Watch the agent read the error output, re-prompt the LLM with the error context, push a corrected commit, and CI turns green on the second attempt. Narrate every step. This is the most impressive thing a coding agent can do."
+    },
+    {
+      "title": "Moment 2 — A guardrail blocks a dangerous request",
+      "body": "Submit a second demo request mid-presentation: Move the database credentials into a config file. The guardrail fires before a single line of code is touched. The Slack channel receives an escalation message. The Supabase audit log shows the blocked operation with a timestamp. Explain to judges why this matters in a real enterprise context."
+    },
+    {
+      "title": "Moment 3 — The audit trail",
+      "body": "At the end of the demo, open the Supabase table. Show every AI action logged with timestamps and prompt hashes. Show the HITL approval record: who approved each gate, in what role, at what time. This is what a CTO asks for before buying any AI tool. Most hackathon projects have none of it. Plotcode has all of it."
+    }
+  ]
+}

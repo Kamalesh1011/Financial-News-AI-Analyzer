@@ -1,0 +1,75 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/api/routes.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxDuration": 30
+      }
+    },
+    {
+      "src": "frontend/dist/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "src/api/routes.py"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/frontend/dist/assets/$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/dist/index.html"
+    }
+  ],
+  "outputDirectory": "frontend/dist",
+  "installCommand": "cd frontend && npm install",
+  "buildCommand": "cd frontend && npm run build",
+  "crons": [
+    {
+      "path": "/api/cron/collect-news",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/collect-market",
+      "schedule": "*/2 * * * *"
+    },
+    {
+      "path": "/api/cron/analyze-sentiment",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/map-impact",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/check-alerts",
+      "schedule": "*/1 * * * *"
+    }
+  ],
+  "env": {
+    "MONGODB_URI": "@mongodb-uri",
+    "MONGODB_DB": "finnews",
+    "FINNHUB_API_KEY": "@finnhub-api-key",
+    "NEWSAPI_API_KEY": "@newsapi-api-key",
+    "OPENROUTER_API_KEY": "@openrouter-api-key",
+    "NIM_API_KEY": "@nim-api-key",
+    "TELEGRAM_BOT_TOKEN": "@telegram-bot-token",
+    "TELEGRAM_CHAT_ID": "@telegram-chat-id",
+    "SMTP_HOST": "smtp.gmail.com",
+    "SMTP_PORT": "587",
+    "SMTP_USER": "@smtp-user",
+    "SMTP_PASS": "@smtp-pass",
+    "ALERT_EMAIL_TO": "@alert-email-to",
+    "JWT_SECRET": "@jwt-secret",
+    "VITE_API_BASE_URL": ""
+  }
+}

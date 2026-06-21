@@ -1,0 +1,82 @@
+[project]
+name = "financial-news-analyzer"
+version = "0.1.0"
+description = "AI-powered financial news analysis with market data, sentiment, and alerts"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "motor>=3.5.0",
+    "pydantic>=2.6.0",
+    "pydantic-settings>=2.2.0",
+    "python-dotenv>=1.0.0",
+    "httpx>=0.26.0",
+    "aiohttp>=3.9.0",
+    "apscheduler>=3.10.0",
+    "openai>=1.10.0",
+    "anthropic>=0.18.0",
+    "python-telegram-bot>=21.0",
+    "aiosmtplib>=3.0.0",
+    "streamlit>=1.31.0",
+    "plotly>=5.18.0",
+    "pandas>=2.2.0",
+    "loguru>=0.7.0",
+    "python-json-logger>=2.0.0",
+    "tenacity>=8.2.0",
+    "python-multipart>=0.0.6",
+    "email-validator>=2.1.0",
+    "pyjwt>=2.8.0",
+    "passlib[bcrypt]>=1.7.4",
+    "bcrypt>=4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-mock>=3.12.0",
+    "httpx>=0.26.0",
+    "ruff>=0.1.0",
+    "black>=23.12.0",
+    "mypy>=1.8.0",
+    "pre-commit>=3.6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "UP", "W", "C90", "ANN", "T20", "PTH", "ERA", "PL", "TRY", "SIM", "TID", "ARG", "N", "Q", "RUF", "RET", "SLF", "PTH", "FA", "PD", "PGH", "PIE", "TCH", "INT", "PERF", "FLY", "NPY", "TD", "TRY", "C4", "DTZ", "EXE", "ISC", "ICN", "PT", "Q", "RET", "RSE", "SLF", "SIM", "TID", "TCH", "TRY", "UP"]
+ignore = ["ANN001", "ANN002", "ANN003", "ANN201", "ANN202", "ANN204", "ARG001", "ARG002", "SLF001", "PTH123", "TRY003", "EM101", "EXE005", "PD011", "RUF012", "T201", "T203"]
+fixable = ["F", "I", "UP", "W", "C90", "ANN", "T20", "PTH", "ERA", "PL", "TRY", "SIM", "TID", "ARG", "N", "Q", "RUF", "RET", "SLF"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*", "scripts/*", "dashboard/*"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "def __repr__", "raise AssertionError", "raise NotImplementedError", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]

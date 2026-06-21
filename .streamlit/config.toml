@@ -1,0 +1,23 @@
+[theme]
+primaryColor = "#60A5FA"
+backgroundColor = "#0B1120"
+secondaryBackgroundColor = "#1E293B"
+textColor = "#F1F5F9"
+linkColor = "#60A5FA"
+borderColor = "#334155"
+font = "sans serif"
+baseRadius = "1rem"
+
+[server]
+headless = true
+enableXsrfProtection = true
+maxUploadSize = 200
+maxMessageSize = 200
+
+[browser]
+gatherUsageStats = false
+serverAddress = "0.0.0.0"
+
+[runner]
+magicEnabled = true
+fastReruns = true

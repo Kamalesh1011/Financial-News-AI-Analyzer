@@ -1,0 +1,360 @@
+/* =====================================================
+   Light Theme - Arctic Light
+   Clean, professional theme with soft shadows
+   ===================================================== */
+
+:root,
+[data-theme="light"] {
+    --bg-primary: #F8FAFC;
+    --bg-secondary: #E2E8F0;
+    --bg-tertiary: #CBD5E1;
+    --bg-gradient: linear-gradient(-45deg, #F8FAFC, #E2E8F0, #F1F5F9, #F8FAFC);
+
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-bg-solid: #FFFFFF;
+    --glass-bg-hover: rgba(255, 255, 255, 0.9);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --glass-border-hover: rgba(37, 99, 235, 0.3);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+    --glass-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.06);
+    --glass-blur: blur(20px);
+
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-tertiary: #94A3B8;
+    --text-inverse: #F8FAFC;
+
+    --accent-blue: #2563EB;
+    --accent-blue-dim: rgba(37, 99, 235, 0.1);
+    --accent-purple: #7C3AED;
+    --accent-purple-dim: rgba(124, 58, 237, 0.1);
+    --accent-pink: #DB2777;
+    --accent-cyan: #0891B2;
+    --accent-gradient: linear-gradient(135deg, #2563EB, #7C3AED);
+    --accent-gradient-vivid: linear-gradient(135deg, #2563EB, #7C3AED, #DB2777);
+
+    --bullish: #16A34A;
+    --bullish-bg: rgba(22, 163, 74, 0.1);
+    --bullish-glow: 0 0 15px rgba(22, 163, 74, 0.2);
+    --bearish: #DC2626;
+    --bearish-bg: rgba(220, 38, 38, 0.1);
+    --bearish-glow: 0 0 15px rgba(220, 38, 38, 0.2);
+    --neutral: #D97706;
+    --neutral-bg: rgba(217, 119, 6, 0.1);
+    --neutral-glow: 0 0 15px rgba(217, 119, 6, 0.2);
+
+    --risk-high: #DC2626;
+    --risk-high-bg: rgba(220, 38, 38, 0.1);
+    --risk-high-glow: 0 0 20px rgba(220, 38, 38, 0.2);
+    --risk-medium: #D97706;
+    --risk-medium-bg: rgba(217, 119, 6, 0.1);
+    --risk-medium-glow: 0 0 20px rgba(217, 119, 6, 0.2);
+    --risk-low: #16A34A;
+    --risk-low-bg: rgba(22, 163, 74, 0.1);
+    --risk-low-glow: 0 0 20px rgba(22, 163, 74, 0.2);
+
+    --sidebar-bg: rgba(15, 23, 42, 0.98);
+    --sidebar-border: rgba(255, 255, 255, 0.08);
+    --sidebar-width: 280px;
+
+    --radius-xs: 6px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.12);
+
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Light Theme Body */
+[data-theme="light"] body,
+[data-theme="light"] .stApp {
+    background: var(--bg-gradient) !important;
+    color: var(--text-primary);
+}
+
+/* Light Theme Glass Card */
+[data-theme="light"] .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] .glass-card:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Light Theme KPI Card */
+[data-theme="light"] .kpi-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.65));
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="light"] .kpi-card:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+    box-shadow: var(--glass-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+/* Light Theme KPI Number */
+[data-theme="light"] .kpi-number {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Light Theme News Card */
+[data-theme="light"] .news-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .news-card:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow);
+}
+
+/* Light Theme Impact Card */
+[data-theme="light"] .impact-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .impact-card.high-risk {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.04), var(--glass-bg));
+    box-shadow: var(--shadow-sm), var(--risk-high-glow);
+}
+
+[data-theme="light"] .impact-card.medium-risk {
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.04), var(--glass-bg));
+    box-shadow: var(--shadow-sm), var(--risk-medium-glow);
+}
+
+/* Light Theme Sidebar */
+[data-theme="light"] [data-testid="stSidebar"] {
+    background: var(--sidebar-bg) !important;
+    border-right: 1px solid var(--sidebar-border) !important;
+    box-shadow: 4px 0 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="light"] [data-testid="stSidebar"] [data-testid="stMarkdown"] {
+    color: #F1F5F9 !important;
+}
+
+/* Light Theme Buttons */
+[data-theme="light"] .glass-btn {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-xs);
+}
+
+[data-theme="light"] .glass-btn:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--shadow-md);
+}
+
+/* Light Theme Input Fields */
+[data-theme="light"] .stTextInput > div > div > input,
+[data-theme="light"] .stNumberInput > div > div > input {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    color: var(--text-primary) !important;
+    box-shadow: var(--shadow-xs);
+}
+
+[data-theme="light"] .stTextInput > div > div > input:focus,
+[data-theme="light"] .stNumberInput > div > div > input:focus {
+    border-color: var(--accent-blue) !important;
+    box-shadow: 0 0 0 3px var(--accent-blue-dim), var(--shadow-sm) !important;
+}
+
+/* Light Theme Select Box */
+[data-theme="light"] .stSelectbox > div > div {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: var(--shadow-xs);
+}
+
+/* Light Theme DataFrame */
+[data-theme="light"] .stDataFrame {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Light Theme Expander */
+[data-theme="light"] .streamlit-expanderHeader {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-xs);
+}
+
+/* Light Theme Tabs */
+[data-theme="light"] .stTabs [data-baseweb="tab-list"] {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    border-radius: var(--radius-lg);
+}
+
+[data-theme="light"] .stTabs [data-baseweb="tab"] {
+    border-radius: var(--radius-md);
+}
+
+[data-theme="light"] .stTabs [aria-selected="true"] {
+    background: var(--accent-gradient) !important;
+    color: white !important;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Light Theme Scrollbar */
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+}
+
+/* Light Theme Chart Background */
+[data-theme="light"] .chart-container {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Light Theme Watchlist Item */
+[data-theme="light"] .watchlist-item {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    box-shadow: var(--shadow-xs);
+}
+
+[data-theme="light"] .watchlist-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--shadow-md);
+}
+
+/* Light Theme Alert Item */
+[data-theme="light"] .alert-item {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    box-shadow: var(--shadow-xs);
+}
+
+/* Light Theme Asset Chip */
+[data-theme="light"] .asset-chip {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    box-shadow: var(--shadow-xs);
+}
+
+[data-theme="light"] .asset-chip:hover {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Light Theme Risk Badge */
+[data-theme="light"] .risk-badge.high {
+    background: var(--risk-high-bg);
+    box-shadow: var(--risk-high-glow);
+}
+
+[data-theme="light"] .risk-badge.medium {
+    background: var(--risk-medium-bg);
+    box-shadow: var(--risk-medium-glow);
+}
+
+[data-theme="light"] .risk-badge.low {
+    background: var(--risk-low-bg);
+    box-shadow: var(--risk-low-glow);
+}
+
+/* Light Theme Progress Bar */
+[data-theme="light"] .stProgress > div > div {
+    background: rgba(226, 232, 240, 0.5) !important;
+}
+
+[data-theme="light"] .stProgress > div > div > div {
+    background: var(--accent-gradient) !important;
+}
+
+/* Light Theme Status Dot */
+[data-theme="light"] .status-dot.online {
+    box-shadow: 0 0 12px var(--bullish);
+}
+
+[data-theme="light"] .status-dot.offline {
+    box-shadow: 0 0 12px var(--bearish);
+}
+
+/* Light Theme Modal */
+[data-theme="light"] .glass-modal {
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow:
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        0 0 100px rgba(37, 99, 235, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+/* Light Theme Skeleton */
+[data-theme="light"] .skeleton {
+    background: linear-gradient(90deg,
+        rgba(226, 232, 240, 0.6) 25%,
+        rgba(241, 245, 249, 0.8) 50%,
+        rgba(226, 232, 240, 0.6) 75%);
+    background-size: 200% 100%;
+}
+
+/* Light Theme Divider */
+[data-theme="light"] hr {
+    background: linear-gradient(90deg, transparent, rgba(226, 232, 240, 0.8), transparent);
+}
+
+/* Light Theme Tooltip */
+[data-theme="light"] .glass-tooltip {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: var(--shadow-md);
+}
+
+/* Light Theme Footer */
+[data-theme="light"] .glass-footer {
+    background: rgba(255, 255, 255, 0.7);
+    border-top: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+/* Light Theme Table */
+[data-theme="light"] table {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="light"] th {
+    background: rgba(241, 245, 249, 0.8);
+}
+
+[data-theme="light"] tr:hover {
+    background: rgba(241, 245, 249, 0.5);
+}
