@@ -386,37 +386,30 @@ class SentimentRepository(BaseRepository):
 
     async def get_source_credibility(self) -> List[Dict[str, Any]]:
         """Get news source credibility scores based on article count and sentiment confidence."""
-        collection = await self._get_collection()
+        news_repo = NewsRepository()
+        news_collection = await news_repo._get_collection()
+        sentiment_collection = await self._get_collection()
+
         pipeline = [
-            {
-                "$group": {
-                    "_id": "$source",
-                    "article_count": {"$sum": 1},
-                }
-            },
+            {"$group": {"_id": "$source", "article_count": {"$sum": 1}}},
             {"$sort": {"article_count": -1}},
         ]
-        source_counts = await collection.aggregate(pipeline).to_list(length=50)
+        source_counts = await news_collection.aggregate(pipeline).to_list(length=50)
 
         results = []
         for sc in source_counts:
             source = sc["_id"]
-            # Get average confidence for this source's sentiment analyses
-            news_repo = NewsRepository()
-            source_news = await news_repo.find_many(
-                filter={"source": source}, limit=50
-            )
+            source_news = await news_repo.find_many(filter={"source": source}, limit=50)
             news_ids = [str(n["_id"]) for n in source_news]
 
+            avg_confidence = 0.5
             if news_ids:
                 avg_pipeline = [
                     {"$match": {"news_id": {"$in": news_ids}}},
                     {"$group": {"_id": None, "avg_confidence": {"$avg": "$confidence"}}},
                 ]
-                avg_result = await collection.aggregate(avg_pipeline).to_list(length=1)
+                avg_result = await sentiment_collection.aggregate(avg_pipeline).to_list(length=1)
                 avg_confidence = avg_result[0]["avg_confidence"] if avg_result else 0.5
-            else:
-                avg_confidence = 0.5
 
             credibility = min(1.0, (sc["article_count"] / 50) * 0.4 + avg_confidence * 0.6)
             results.append({

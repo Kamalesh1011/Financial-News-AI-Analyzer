@@ -50,13 +50,16 @@ class NewsCollectorAgent(BaseAgent):
         watchlist_repo = WatchlistRepository()
         symbols = await watchlist_repo.get_watchlist_symbols()
 
-        for symbol in symbols[:10]:  # Limit to avoid rate limits
-            company_news = await self.finnhub.get_company_news(symbol)
-            for article in company_news:
-                normalized = self._normalize_finnhub_article(article, primary_ticker=symbol)
-                if normalized:
-                    articles.append(normalized)
-            await asyncio.sleep(0.5)  # Rate limiting
+        for symbol in symbols[:5]:
+            try:
+                company_news = await self.finnhub.get_company_news(symbol)
+                for article in company_news:
+                    normalized = self._normalize_finnhub_article(article, primary_ticker=symbol)
+                    if normalized:
+                        articles.append(normalized)
+            except Exception as e:
+                logger.warning(f"Failed to get company news for {symbol}: {e}")
+            await asyncio.sleep(0.1)
 
         return articles
 
@@ -72,6 +75,7 @@ class NewsCollectorAgent(BaseAgent):
 
             return {
                 "source": "finnhub",
+                "source_name": article.get("source", "Finnhub"),
                 "external_id": str(article.get("id", "")),
                 "title": article.get("headline", ""),
                 "summary": article.get("summary", ""),
@@ -173,12 +177,15 @@ class NewsCollectorAgent(BaseAgent):
         """Execute the news collection."""
         all_articles = []
         errors = []
+        finnhub_count = 0
+        newsapi_count = 0
 
         # Collect from Finnhub
         try:
             finnhub_articles = await self.collect_finnhub_news()
             all_articles.extend(finnhub_articles)
-            logger.info(f"Finnhub: collected {len(finnhub_articles)} articles")
+            finnhub_count = len(finnhub_articles)
+            logger.info(f"Finnhub: collected {finnhub_count} articles")
         except Exception as e:
             errors.append(f"Finnhub error: {e}")
             logger.error(f"Finnhub collection failed: {e}")
@@ -187,7 +194,8 @@ class NewsCollectorAgent(BaseAgent):
         try:
             newsapi_articles = await self.collect_newsapi_news()
             all_articles.extend(newsapi_articles)
-            logger.info(f"NewsAPI: collected {len(newsapi_articles)} articles")
+            newsapi_count = len(newsapi_articles)
+            logger.info(f"NewsAPI: collected {newsapi_count} articles")
         except Exception as e:
             errors.append(f"NewsAPI error: {e}")
             logger.error(f"NewsAPI collection failed: {e}")
@@ -204,8 +212,8 @@ class NewsCollectorAgent(BaseAgent):
             items_new=new_count,
             errors=errors,
             metadata={
-                "finnhub_count": len(finnhub_articles) if 'finnhub_articles' in dir() else 0,
-                "newsapi_count": len(newsapi_articles) if 'newsapi_articles' in dir() else 0,
+                "finnhub_count": finnhub_count,
+                "newsapi_count": newsapi_count,
                 "deduplicator_stats": self.deduplicator.get_stats(),
             },
         )

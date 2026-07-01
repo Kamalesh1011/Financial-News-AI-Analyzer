@@ -87,7 +87,8 @@ class ImpactMapperAgent(BaseAgent):
             {"$limit": limit},
         ]
 
-        return await self.news_repo.collection.aggregate(pipeline).to_list(length=limit)
+        collection = await self.news_repo._get_collection()
+        return await collection.aggregate(pipeline).to_list(length=limit)
 
     def calculate_risk_level(
         self,

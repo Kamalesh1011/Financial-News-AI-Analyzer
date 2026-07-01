@@ -100,7 +100,7 @@ export function NewsFeed({ articles }: NewsFeedProps) {
                 <SentimentBadge sentiment={sentiment} confidence={confidence} />
               </div>
               <div className="text-xs text-slate-500 mb-3">
-                {article.source} • {new Date(article.published_at).toLocaleDateString()}
+                {article.source_name || article.source} • {new Date(article.published_at).toLocaleDateString()}
               </div>
               {article.summary && (
                 <p className="text-sm text-slate-400 mb-4 line-clamp-2 leading-relaxed">{article.summary.slice(0, 200)}...</p>

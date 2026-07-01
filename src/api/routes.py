@@ -46,6 +46,7 @@ def _serialize_doc(doc: dict) -> dict:
     """Convert MongoDB document for JSON response."""
     if doc and "_id" in doc:
         doc["_id"] = str(doc["_id"])
+        doc["id"] = doc["_id"]
     for key in ("created_at", "published_at", "timestamp", "sent_at", "started_at", "completed_at"):
         if key in doc and doc[key] is not None:
             doc[key] = doc[key].isoformat() if isinstance(doc[key], datetime) else doc[key]
@@ -144,12 +145,26 @@ async def get_news(
     limit: int = Query(50, ge=1, le=200),
     ticker: Optional[str] = None,
 ):
-    """Get news articles."""
+    """Get news articles - auto-fetches if DB is empty."""
     repo = NewsRepository()
     if ticker:
         articles = await repo.get_by_ticker(ticker, limit=limit)
     else:
         articles = await repo.get_recent(hours=hours, limit=limit)
+
+    if not articles:
+        try:
+            from src.agents.news_collector import NewsCollectorAgent
+            agent = NewsCollectorAgent()
+            result = await agent.run()
+            logger.info(f"Auto-fetch news: {result.status} ({result.items_new} new)")
+            if ticker:
+                articles = await repo.get_by_ticker(ticker, limit=limit)
+            else:
+                articles = await repo.get_recent(hours=hours, limit=limit)
+        except Exception as e:
+            logger.error(f"Auto-fetch news failed: {e}")
+
     for a in articles:
         _serialize_doc(a)
     return {"articles": articles, "count": len(articles)}
@@ -540,46 +555,66 @@ async def run_backtest(request: BacktestRequest):
 @app.get("/api/cron/collect-news")
 async def cron_collect_news():
     """Cron job: Collect news."""
-    from src.agents.news_collector import NewsCollectorAgent
-    agent = NewsCollectorAgent()
-    result = await agent.run()
-    return result.to_dict()
+    try:
+        from src.agents.news_collector import NewsCollectorAgent
+        agent = NewsCollectorAgent()
+        result = await agent.run()
+        return result.to_dict()
+    except Exception as e:
+        logger.error(f"Cron collect-news failed: {e}")
+        return {"status": "error", "error": str(e)}
 
 
 @app.get("/api/cron/collect-market")
 async def cron_collect_market():
     """Cron job: Collect market data."""
-    from src.agents.market_collector import MarketDataCollectorAgent
-    agent = MarketDataCollectorAgent()
-    result = await agent.run()
-    return result.to_dict()
+    try:
+        from src.agents.market_collector import MarketDataCollectorAgent
+        agent = MarketDataCollectorAgent()
+        result = await agent.run()
+        return result.to_dict()
+    except Exception as e:
+        logger.error(f"Cron collect-market failed: {e}")
+        return {"status": "error", "error": str(e)}
 
 
 @app.get("/api/cron/analyze-sentiment")
 async def cron_analyze_sentiment():
     """Cron job: Analyze sentiment."""
-    from src.agents.sentiment_analyzer import SentimentAnalyzerAgent
-    agent = SentimentAnalyzerAgent()
-    result = await agent.run()
-    return result.to_dict()
+    try:
+        from src.agents.sentiment_analyzer import SentimentAnalyzerAgent
+        agent = SentimentAnalyzerAgent()
+        result = await agent.run()
+        return result.to_dict()
+    except Exception as e:
+        logger.error(f"Cron analyze-sentiment failed: {e}")
+        return {"status": "error", "error": str(e)}
 
 
 @app.get("/api/cron/map-impact")
 async def cron_map_impact():
     """Cron job: Map impact."""
-    from src.agents.impact_mapper import ImpactMapperAgent
-    agent = ImpactMapperAgent()
-    result = await agent.run()
-    return result.to_dict()
+    try:
+        from src.agents.impact_mapper import ImpactMapperAgent
+        agent = ImpactMapperAgent()
+        result = await agent.run()
+        return result.to_dict()
+    except Exception as e:
+        logger.error(f"Cron map-impact failed: {e}")
+        return {"status": "error", "error": str(e)}
 
 
 @app.get("/api/cron/check-alerts")
 async def cron_check_alerts():
     """Cron job: Check and send alerts."""
-    from src.agents.alert_engine import AlertEngineAgent
-    agent = AlertEngineAgent()
-    result = await agent.run()
-    return result.to_dict()
+    try:
+        from src.agents.alert_engine import AlertEngineAgent
+        agent = AlertEngineAgent()
+        result = await agent.run()
+        return result.to_dict()
+    except Exception as e:
+        logger.error(f"Cron check-alerts failed: {e}")
+        return {"status": "error", "error": str(e)}
 
 
 # Database stats

@@ -1,5 +1,5 @@
 """Database package for MongoDB async client."""
-from .mongodb import MongoDB, get_mongodb
+from .mongodb import MongoDB, get_database
 from .models import (
     RawNewsDocument,
     MarketDataDocument,
@@ -19,7 +19,7 @@ from .repositories import (
 
 __all__ = [
     "MongoDB",
-    "get_mongodb",
+    "get_database",
     "RawNewsDocument",
     "MarketDataDocument",
     "SentimentAnalysisDocument",

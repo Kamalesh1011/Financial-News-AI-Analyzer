@@ -94,20 +94,23 @@ export function Dashboard() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [dateRange, setDateRange] = useState<{ start: string; end: string }>(() => ({
-    start: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+    start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
     end: new Date().toISOString().slice(0, 16),
   }));
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
+      const startDate = new Date(dateRange.start).getTime();
+      const endDate = new Date(dateRange.end).getTime();
+      const hours = Math.max(1, Math.round((endDate - startDate) / (1000 * 60 * 60)));
       const [newsData, marketData, sentimentData, impactData, alertData, watchlistData] =
         await Promise.all([
-          fetchNews(),
+          fetchNews(hours, 50),
           fetchMarketData(),
-          fetchSentimentDistribution(),
-          fetchImpactAnalyses(),
-          fetchAlerts(),
+          fetchSentimentDistribution(hours),
+          fetchImpactAnalyses(hours, 20),
+          fetchAlerts(hours, 30),
           fetchWatchlist(),
         ]);
       setNews(newsData);
@@ -119,7 +122,7 @@ export function Dashboard() {
       setLoading(false);
     };
     loadData();
-  }, []);
+  }, [dateRange]);
 
   const bullishPct = (() => {
     const total = sentiment.reduce((sum, s) => sum + s.count, 0);
@@ -274,7 +277,7 @@ export function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <PdfExport newsCount={news.length} sentimentData={sentiment} impactCount={impacts.length} alertCount={alerts.length} marketData={market} />
+              <PdfExport news={news} sentimentData={sentiment} impacts={impacts} alerts={alerts} marketData={market} />
               <ThemeToggle />
               <div className="text-right hidden md:block">
                 <div className="text-xs text-[var(--text-muted)] font-mono">

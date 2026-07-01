@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from loguru import logger
+from bson import ObjectId
 from tenacity import (
     retry,
     stop_after_attempt,
@@ -220,7 +221,7 @@ class BaseAgent(ABC):
             # Update job status
             status = "completed" if result.status != "failed" else "failed"
             await self.job_repo.update_one(
-                filter={"_id": job_id},
+                filter={"_id": ObjectId(job_id)},
                 update={
                     "$set": {
                         "status": status,
@@ -254,17 +255,20 @@ class BaseAgent(ABC):
 
             # Update job status
             if job_id:
-                await self.job_repo.update_one(
-                    filter={"_id": job_id},
-                    update={
-                        "$set": {
-                            "status": "failed",
-                            "completed_at": result.completed_at,
-                            "duration_seconds": result.duration_seconds,
-                            "errors": [str(e)],
-                        }
-                    },
-                )
+                try:
+                    await self.job_repo.update_one(
+                        filter={"_id": ObjectId(job_id)},
+                        update={
+                            "$set": {
+                                "status": "failed",
+                                "completed_at": result.completed_at,
+                                "duration_seconds": result.duration_seconds,
+                                "errors": [str(e)],
+                            }
+                        },
+                    )
+                except Exception:
+                    pass
 
             return result
 

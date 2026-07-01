@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : '');
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem("token");
@@ -10,6 +10,7 @@ export interface NewsArticle {
   title: string;
   summary: string;
   source: string;
+  source_name?: string;
   url: string;
   published_at: string;
   tickers: string[];
