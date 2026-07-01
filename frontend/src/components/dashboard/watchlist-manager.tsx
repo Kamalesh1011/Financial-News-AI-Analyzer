@@ -112,6 +112,7 @@ export function WatchlistManager({ watchlist, onAdd, onRemove }: WatchlistManage
               "focus:outline-none focus:border-cyan-500/50",
               "transition-colors appearance-none min-w-[100px]"
             )}
+            style={{ colorScheme: "dark" }}
           >
             {assetTypeOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
