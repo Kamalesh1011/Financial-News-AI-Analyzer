@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, X } from "lucide-react";
+import { Search, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { WatchlistItem } from "@/lib/api";
 import { showToast } from "@/components/ui/toast";
@@ -25,6 +25,8 @@ export function WatchlistManager({ watchlist, onAdd, onRemove }: WatchlistManage
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleAdd = () => {
     if (newSymbol.trim()) {
@@ -39,6 +41,16 @@ export function WatchlistManager({ watchlist, onAdd, onRemove }: WatchlistManage
     showToast(`Removed ${symbol} from watchlist`, "success");
     setConfirmDelete(null);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setTypeDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const filtered = useMemo(() => {
     let items = watchlist;
@@ -102,24 +114,46 @@ export function WatchlistManager({ watchlist, onAdd, onRemove }: WatchlistManage
               "transition-colors"
             )}
           />
-          <select
-            value={assetType}
-            onChange={(e) => setAssetType(e.target.value)}
-            className={cn(
-              "px-3 py-2 rounded-lg",
-              "bg-[var(--bg-surface)] border border-[var(--border-subtle)]",
-              "text-[var(--text-primary)] text-sm",
-              "focus:outline-none focus:border-cyan-500/50",
-              "transition-colors appearance-none min-w-[100px]"
+          <div ref={dropdownRef} className="relative min-w-[120px]">
+            <button
+              onClick={() => setTypeDropdownOpen(!typeDropdownOpen)}
+              className={cn(
+                "w-full px-3 py-2 rounded-lg flex items-center justify-between gap-2",
+                "bg-[var(--bg-surface)] border border-[var(--border-subtle)]",
+                "text-[var(--text-primary)] text-sm",
+                "focus:outline-none focus:border-cyan-500/50",
+                "transition-colors"
+              )}
+            >
+              <span>{assetTypeOptions.find((o) => o.value === assetType)?.label}</span>
+              <ChevronDown className={cn("h-3.5 w-3.5 text-[var(--text-muted)] transition-transform", typeDropdownOpen && "rotate-180")} />
+            </button>
+            {typeDropdownOpen && (
+              <div className={cn(
+                "absolute top-full left-0 mt-1 w-full z-50",
+                "bg-[var(--bg-surface)] border border-[var(--border-subtle)]",
+                "rounded-lg shadow-xl overflow-hidden"
+              )}>
+                {assetTypeOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => {
+                      setAssetType(opt.value);
+                      setTypeDropdownOpen(false);
+                    }}
+                    className={cn(
+                      "w-full px-3 py-2 text-left text-sm transition-colors",
+                      assetType === opt.value
+                        ? "bg-cyan-500/20 text-cyan-400"
+                        : "text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             )}
-            style={{ colorScheme: "dark" }}
-          >
-            {assetTypeOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+          </div>
           <button
             onClick={handleAdd}
             className={cn(
